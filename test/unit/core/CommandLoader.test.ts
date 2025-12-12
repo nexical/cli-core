@@ -197,4 +197,18 @@ describe('CommandLoader', () => {
         const commands = await loader.load(rootDir);
         expect(commands).toHaveLength(0);
     });
+    it('should return loaded commands via getCommands', async () => {
+        const rootDir = '/commands';
+        (fs.existsSync as any).mockReturnValue(true);
+        (fs.readdirSync as any).mockReturnValue(['test.ts']);
+        (fs.statSync as any).mockReturnValue({ isDirectory: () => false });
+
+        class TestCmd extends BaseCommand { async run() { } }
+        mockImporter.mockResolvedValue({ default: TestCmd });
+
+        await loader.load(rootDir);
+        const cmds = loader.getCommands();
+        expect(cmds).toHaveLength(1);
+        expect(cmds[0].command).toBe('test');
+    });
 });

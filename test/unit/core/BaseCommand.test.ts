@@ -110,11 +110,11 @@ describe('BaseCommand', () => {
         expect(consoleLogSpy).toHaveBeenCalledWith(pc.cyan('? test'));
     });
 
-    it('should log info using logger', () => {
+    it('should log info', () => {
         const cli = new CLI({ commandName: 'app' });
         const cmd = new TestCommand(cli);
         cmd.info('test');
-        expect(logger.info).toHaveBeenCalledWith('test');
+        expect(consoleLogSpy).toHaveBeenCalledWith('test');
     });
 
     it('should log warn', () => {
