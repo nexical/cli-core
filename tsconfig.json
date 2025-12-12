@@ -14,9 +14,9 @@
         "outDir": "./dist"
     },
     "include": [
+        "cli.ts",
         "src/**/*",
-        "test/**/*",
-        "../utils/environment.ts"
+        "test/**/*"
     ],
     "exclude": [
         "node_modules",

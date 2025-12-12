@@ -1,11 +1,16 @@
 {
     "name": "@nexical/cli-core",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js"
+    },
     "scripts": {
         "build": "tsup",
         "dev": "tsup --watch",
-        "cli": "node dist/index.js",
+        "cli": "node dist/cli.js",
         "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
         "test:unit": "vitest run --config vitest.config.ts --coverage",
         "test:integration": "vitest run --config vitest.integration.config.ts",

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 // Constants
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-export const CLI_BIN = path.resolve(__dirname, '../../dist/index.js');
+export const CLI_BIN = path.resolve(__dirname, '../../dist/cli.js');
 
 /**
  * Runs the CLI command against the compiled binary (E2E style)

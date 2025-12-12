@@ -1,9 +1,3 @@
-#!/usr/bin/env node
-import { CLI } from './src/CLI.js';
-
-import { logger } from './src/utils/logger.js';
-
-logger.debug('CLI ENTRY POINT HIT', process.argv);
-
-const app = new CLI();
-app.start();
+export { CLI, CLIConfig } from './src/CLI.js';
+export { BaseCommand } from './src/BaseCommand.js';
+export * from './src/CommandInterface.js';
