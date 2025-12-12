@@ -2,9 +2,9 @@ import { consola, LogLevels } from 'consola';
 
 export const logger = consola.create({
     defaults: {
-        tag: 'DEBUG',
+        tag: 'CLI',
     },
-    level: LogLevels.info, // Default to info
+    level: LogLevels.info
 });
 
 export function setDebugMode(enabled: boolean) {
