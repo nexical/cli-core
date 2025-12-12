@@ -108,7 +108,7 @@ export default class GreetCommand extends BaseCommand {
 
     // Implement the run method
     async run(options: any) {
-        this.log('Hello from my-cli!');
+        this.info('Hello from my-cli!');
     }
 }
 ```
@@ -155,7 +155,7 @@ export default class GreetCommand extends BaseCommand {
         const finalMessage = shout ? message.toUpperCase() : message;
 
         for (let i = 0; i < count; i++) {
-            this.log(finalMessage);
+            this.info(finalMessage);
         }
     }
 }
@@ -186,7 +186,7 @@ The core is built around three main components:
     *   `init()`: Async initialization hook (pre-run).
     *   `run()`: The main execution logic.
     *   `this.projectRoot`: Automatically resolved path to the project root (if running in a project context).
-    *   Logging helpers (`this.success`, `this.warn`, `this.error`).
+    *   Output helpers (`this.info` `this.success`, `this.warn`, `this.error`).
 
 ---
 
