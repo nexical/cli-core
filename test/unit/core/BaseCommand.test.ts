@@ -4,9 +4,22 @@ import { BaseCommand } from '../../../src/BaseCommand.js';
 import * as ConfigUtils from '../../../src/utils/config.js';
 import { logger } from '../../../src/utils/logger.js';
 import process from 'node:process';
+import pc from 'picocolors';
+import { consola } from 'consola';
 
 vi.mock('../../../src/utils/config.js');
 vi.mock('../../../src/utils/logger.js');
+vi.mock('consola', async (importOriginal) => {
+    const actual: any = await importOriginal();
+    return {
+        ...actual,
+        consola: {
+            ...actual.consola,
+            create: actual.consola?.create || actual.create || (() => ({})),
+            prompt: vi.fn(),
+        }
+    };
+});
 
 class TestCommand extends BaseCommand {
     async run() { }
@@ -19,14 +32,17 @@ class ProjectRequiredCommand extends BaseCommand {
 
 describe('BaseCommand', () => {
     let processExitSpy: any;
+    let consoleLogSpy: any;
 
     beforeEach(() => {
         vi.clearAllMocks();
         processExitSpy = vi.spyOn(process, 'exit').mockImplementation((() => { }) as any);
+        consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
     });
 
     afterEach(() => {
         processExitSpy.mockRestore();
+        consoleLogSpy.mockRestore();
     });
 
     it('should initialize with default options', () => {
@@ -69,7 +85,7 @@ describe('BaseCommand', () => {
         const cmd = new ProjectRequiredCommand(cli, {});
         await cmd.init();
 
-        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('requires to be run within an app project'));
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.red('✖ This command requires to be run within an app project (app.yml not found).'));
         expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -77,10 +93,24 @@ describe('BaseCommand', () => {
         const cli = new CLI({ commandName: 'app' });
         const cmd = new TestCommand(cli);
         cmd.success('test');
-        expect(logger.success).toHaveBeenCalledWith('test');
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.green('✔ test'));
     });
 
-    it('should log info', () => {
+    it('should log notice', () => {
+        const cli = new CLI({ commandName: 'app' });
+        const cmd = new TestCommand(cli);
+        cmd.notice('test');
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.blue('📢 test'));
+    });
+
+    it('should log input', () => {
+        const cli = new CLI({ commandName: 'app' });
+        const cmd = new TestCommand(cli);
+        cmd.input('test');
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.cyan('? test'));
+    });
+
+    it('should log info using logger', () => {
         const cli = new CLI({ commandName: 'app' });
         const cmd = new TestCommand(cli);
         cmd.info('test');
@@ -91,14 +121,14 @@ describe('BaseCommand', () => {
         const cli = new CLI({ commandName: 'app' });
         const cmd = new TestCommand(cli);
         cmd.warn('test');
-        expect(logger.warn).toHaveBeenCalledWith('test');
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.yellow('⚠ test'));
     });
 
     it('should log error string and exit', () => {
         const cli = new CLI({ commandName: 'app' });
         const cmd = new TestCommand(cli);
         cmd.error('fail', 1);
-        expect(logger.error).toHaveBeenCalledWith('fail');
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.red('✖ fail'));
         expect(process.exit).toHaveBeenCalledWith(1);
     });
 
@@ -107,7 +137,7 @@ describe('BaseCommand', () => {
         const cmd = new TestCommand(cli);
         const err = new Error('fail');
         cmd.error(err, 2);
-        expect(logger.error).toHaveBeenCalledWith('fail');
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.red('✖ fail'));
         expect(process.exit).toHaveBeenCalledWith(2);
     });
 
@@ -116,9 +146,10 @@ describe('BaseCommand', () => {
         const cmd = new TestCommand(cli, { debug: true });
         const err = new Error('fail');
         cmd.error(err);
-        expect(logger.error).toHaveBeenCalledWith('fail');
-        expect(logger.error).toHaveBeenCalledTimes(2); // One for message, one for stack
+        expect(consoleLogSpy).toHaveBeenCalledWith(pc.red('✖ fail'));
+        expect(logger.error).toHaveBeenCalledWith(err.stack); // Stack is still logged via logger in debug
     });
+
     it('should skip config loading if project root is not found', async () => {
         (ConfigUtils.findProjectRoot as any).mockResolvedValue(null);
         const cli = new CLI({ commandName: 'app' });
@@ -127,5 +158,16 @@ describe('BaseCommand', () => {
         expect((cmd as any).projectRoot).toBeNull();
         expect(ConfigUtils.loadConfig).not.toHaveBeenCalled();
         expect((cmd as any).config).toEqual({});
+    });
+
+    it('should prompt user and return input', async () => {
+        const cli = new CLI({ commandName: 'app' });
+        const cmd = new TestCommand(cli);
+        (consola.prompt as any).mockResolvedValue('user input');
+
+        const res = await cmd.prompt('Enter value');
+
+        expect(consola.prompt).toHaveBeenCalledWith('Enter value', { type: 'text' });
+        expect(res).toBe('user input');
     });
 });

@@ -186,7 +186,15 @@ The core is built around three main components:
     *   `init()`: Async initialization hook (pre-run).
     *   `run()`: The main execution logic.
     *   `this.projectRoot`: Automatically resolved path to the project root (if running in a project context).
-    *   Output helpers (`this.info` `this.success`, `this.warn`, `this.error`).
+    *   Output helpers:
+        *   `this.success(msg)`: Logs success message (✔) in green.
+        *   `this.warn(msg)`: Logs warning message (⚠) in yellow.
+        *   `this.error(msg, code?)`: Logs error (✖) in red and exits.
+        *   `this.notice(msg)`: Logs a notice (📢) in blue.
+        *   `this.input(msg)`: Logs an input prompt display (?) in cyan.
+        *   `this.info(msg)`: Standard informational message.
+    *   Input helpers:
+        *   `this.prompt(msg)`: Prompts the user for input and returns the result.
 
 ---
 

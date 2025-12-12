@@ -340,6 +340,6 @@ describe('HelpCommand', () => {
             expect(e.message).toBe('EXIT');
         }
 
-        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Unknown command: unknown'));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('✖ Unknown command: unknown'));
     });
 });
