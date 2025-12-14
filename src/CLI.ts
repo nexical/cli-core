@@ -51,7 +51,7 @@ export class CLI {
         let commandsDirs: string[] = [];
 
         if (this.config.searchDirectories && this.config.searchDirectories.length > 0) {
-            commandsDirs = this.config.searchDirectories;
+            commandsDirs = [...this.config.searchDirectories];
         } else {
             // We assume the standard structure:
             // cli/
@@ -67,15 +67,25 @@ export class CLI {
 
             const possibleDirs = [
                 path.resolve(__dirname, './src/commands'),
-                path.resolve(process.cwd(), 'commands')    // Fallback relative to cwd?
+                path.resolve(process.cwd(), 'commands')    // Fallback relative to cwd
             ];
 
             for (const dir of possibleDirs) {
                 if (fs.existsSync(dir)) {
                     commandsDirs.push(dir);
-                    break; // Keep existing behavior: verify if we want multiple or just first found
                 }
             }
+        }
+
+        // Always add core commands directory (where help command lives)
+        const coreCommandsDir = path.resolve(__dirname, './commands');
+        const coreCommandsDirSrc = path.resolve(__dirname, './src/commands');
+
+        if (fs.existsSync(coreCommandsDir)) {
+            commandsDirs.push(coreCommandsDir);
+        } else if (fs.existsSync(coreCommandsDirSrc)) {
+            // Fallback for tsup chunking which puts CLI in dist/ but keeps src/commands in dist/src/commands
+            commandsDirs.push(coreCommandsDirSrc);
         }
 
         // Fallback or error

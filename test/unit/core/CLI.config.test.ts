@@ -61,7 +61,7 @@ describe('CLI Configuration', () => {
 
         await cli.start();
 
-        expect(mockLoad).toHaveBeenCalledTimes(2);
+        expect(mockLoad).toHaveBeenCalledTimes(3);
         expect(mockLoad).toHaveBeenCalledWith('/custom/path/1');
         expect(mockLoad).toHaveBeenCalledWith('/custom/path/2');
     });
@@ -72,8 +72,8 @@ describe('CLI Configuration', () => {
 
         await cli.start();
 
-        // Should try default paths. Since we mock existsSync to true, it stops at the first one.
-        expect(mockLoad).toHaveBeenCalledTimes(1);
+        // Should try default paths (2) + core commands (1) = 3
+        expect(mockLoad).toHaveBeenCalledTimes(3);
     });
 
     it('should fallback to default logic if searchDirectories is undefined', async () => {
@@ -82,6 +82,6 @@ describe('CLI Configuration', () => {
 
         await cli.start();
 
-        expect(mockLoad).toHaveBeenCalledTimes(1);
+        expect(mockLoad).toHaveBeenCalledTimes(3);
     });
 });

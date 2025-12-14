@@ -101,8 +101,28 @@ describe('CLI', () => {
             .mockReturnValueOnce(true); // second path found
 
         await cli.start();
-        expect(fs.existsSync).toHaveBeenCalledTimes(2);
+        expect(fs.existsSync).toHaveBeenCalledTimes(3);
         expect(mockLoad).toHaveBeenCalled();
+        expect(fs.existsSync).toHaveBeenCalledTimes(3);
+        expect(mockLoad).toHaveBeenCalled();
+    });
+
+    it('should fallback to src/commands if ./commands missing (bundling support)', async () => {
+        const cli = new CLI();
+        // searchDirectories default check: returns false for both default paths
+        // then coreCommandsDir (./commands) -> false
+        // then coreCommandsDirSrc (./src/commands) -> true
+        (fs.existsSync as any)
+            .mockReturnValueOnce(false)
+            .mockReturnValueOnce(false)
+            .mockReturnValueOnce(false)
+            .mockReturnValueOnce(true);
+
+        await cli.start();
+        expect(fs.existsSync).toHaveBeenCalledTimes(4);
+        expect(mockLoad).toHaveBeenCalledTimes(1);
+        // arguments of load should contain src/commands path
+        // but verifying exact path is hard due to resolve.
     });
 
     it('should register loaded commands', async () => {
