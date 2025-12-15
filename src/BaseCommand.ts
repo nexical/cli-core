@@ -35,7 +35,7 @@ export abstract class BaseCommand implements CommandInterface {
         const requiresProject = (this.constructor as any).requiresProject;
 
         if (requiresProject && !this.projectRoot) {
-            this.error('This command requires to be run within an app project (app.yml not found).', 1);
+            this.error(`This command requires to be run within an app project (${this.cli.name}.yml not found).`, 1);
             return; // TS doesn't know error exits
         }
 
