@@ -10,12 +10,14 @@ import { logger, setDebugMode } from './utils/logger.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export interface CLIConfig {
+    version?: string;
     commandName?: string;
     searchDirectories?: string[];
 }
 
 export class CLI {
     public name: string;
+    public version: string;
     private cli: ReturnType<typeof cac>;
     private loader: CommandLoader;
     private HelpCommandClass: any;
@@ -24,6 +26,7 @@ export class CLI {
     constructor(config: CLIConfig = {}) {
         this.config = config;
         this.name = this.config.commandName || 'app';
+        this.version = this.config.version || pkg.version;
         this.cli = cac(this.name);
         this.loader = new CommandLoader(this);
     }
@@ -249,7 +252,7 @@ export class CLI {
         // Manually register global help to ensure it's allowed
         this.cli.option('--help, -h', 'Display help');
 
-        this.cli.version(pkg.version);
+        this.cli.version(this.version);
 
         // Global help interception for root command
         // If we run `app --help`, we need to catch it.
