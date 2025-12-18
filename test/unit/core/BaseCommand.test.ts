@@ -84,9 +84,21 @@ describe('BaseCommand', () => {
         const cli = new CLI({ commandName: 'app' });
         const cmd = new ProjectRequiredCommand(cli, {});
         await cmd.init();
+        await cmd.runInit({});
 
         expect(consoleLogSpy).toHaveBeenCalledWith(pc.red('✖ This command requires to be run within an app project (app.yml not found).'));
         expect(process.exit).toHaveBeenCalledWith(1);
+    });
+
+    it('should execute run method via runInit', async () => {
+        const cli = new CLI({ commandName: 'app' });
+        const cmd = new TestCommand(cli);
+        const runSpy = vi.spyOn(cmd, 'run');
+
+        await cmd.init();
+        await cmd.runInit({});
+
+        expect(runSpy).toHaveBeenCalled();
     });
 
     it('should log success', () => {

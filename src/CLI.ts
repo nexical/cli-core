@@ -315,7 +315,7 @@ export class CLI {
         try {
             const instance = new CommandClass(this, options);
             await instance.init();
-            await instance.run(options);
+            await instance.runInit(options);
         } catch (e: any) {
             console.error(pc.red(e.message));
             if (options.debug) console.error(e.stack);

@@ -32,17 +32,19 @@ export abstract class BaseCommand implements CommandInterface {
             this.projectRoot = await findProjectRoot(this.cli.name, process.cwd());
         }
 
-        const requiresProject = (this.constructor as any).requiresProject;
-
-        if (requiresProject && !this.projectRoot) {
-            this.error(`This command requires to be run within an app project (${this.cli.name}.yml not found).`, 1);
-            return; // TS doesn't know error exits
-        }
-
         if (this.projectRoot) {
             this.config = await loadConfig(this.cli.name, this.projectRoot);
-            // logger.debug(`Loaded config from ${this.projectRoot}`);
+            logger.debug(`Loaded config from ${this.projectRoot}`);
         }
+    }
+
+    async runInit(options: any): Promise<void> {
+        const requiresProject = (this.constructor as any).requiresProject;
+        if (requiresProject && !this.projectRoot) {
+            this.error(`This command requires to be run within an app project (${this.cli.name}.yml not found).`, 1);
+            return;
+        }
+        await this.run(options);
     }
 
     abstract run(options: any): Promise<void>;

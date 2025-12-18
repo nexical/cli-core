@@ -38,8 +38,12 @@ describe('Config Loading & Error Messaging', () => {
         (ConfigUtils.loadConfig as any).mockResolvedValue({});
 
         await command.init();
+        // project root finding happens in init, verification happens in runInit
+        // but this test marks requiresProject=true, so if we don't call runInit, we only verify init logic.
+        // The original test verified init logic calling loadConfig.
 
         expect(ConfigUtils.findProjectRoot).toHaveBeenCalledWith('astrical', expect.any(String));
+        // loadConfig is called in init if root is found
         expect(ConfigUtils.loadConfig).toHaveBeenCalledWith('astrical', '/some/path');
     });
 
@@ -50,6 +54,7 @@ describe('Config Loading & Error Messaging', () => {
         (ConfigUtils.findProjectRoot as any).mockResolvedValue(null);
 
         await command.init();
+        await command.runInit({});
 
         expect(consoleLogSpy).toHaveBeenCalledWith(
             expect.stringContaining(pc.red('✖ This command requires to be run within an app project (astrical.yml not found).'))
@@ -64,6 +69,7 @@ describe('Config Loading & Error Messaging', () => {
         (ConfigUtils.findProjectRoot as any).mockResolvedValue(null);
 
         await command.init();
+        await command.runInit({});
 
         expect(consoleLogSpy).toHaveBeenCalledWith(
             expect.stringContaining(pc.red('✖ This command requires to be run within an app project (app.yml not found).'))
