@@ -42,10 +42,6 @@ export class CLI {
     }
 
     async start() {
-        // In built version, we are in dist/index.js (from cli/index.ts) -> core bundled? or just imported.
-        // The core logic is now in src/cli/core/src/CLI.ts or dist/core/src/CLI.js
-
-        // Check for debug flag early
         if (process.argv.includes('--debug')) {
             setDebugMode(true);
             logger.debug('Debug mode enabled via --debug flag');
@@ -56,18 +52,6 @@ export class CLI {
         if (this.config.searchDirectories && this.config.searchDirectories.length > 0) {
             commandsDirs = [...this.config.searchDirectories];
         } else {
-            // We assume the standard structure:
-            // cli/
-            //   index.js
-            //   commands/
-            //   core/
-            //     src/
-            //       CLI.ts
-
-            // When running from source (ts-node src/cli/index.ts), specific commands are in src/cli/commands.
-            // core is in src/cli/core/src.
-            // Relative path from CLI.ts to commands: ../../../commands
-
             const possibleDirs = [
                 path.resolve(__dirname, './src/commands'),
                 path.resolve(process.cwd(), 'commands')    // Fallback relative to cwd
@@ -183,12 +167,6 @@ export class CLI {
                     const options = args.pop(); // last is options
 
                     if (!subcommand || options.help) {
-                        // If --help is passed to 'module --help', subcommand might be caught as 'module' if args parsing is weird?  
-                        // ACTUALLY: cac parses 'module add --help' as subcommand="add".
-                        // 'module --help' might trigger the command itself? No, 'module <subcommand>' expects a subcommand.
-                        // If I run 'module --help', it might fail validation or parse 'help' as subcommand if unlucky, 
-                        // but likely it just prints help if we didn't override.
-
                         await this.runHelp([root, subcommand].filter(Boolean));
                         return;
                     }
@@ -205,17 +183,7 @@ export class CLI {
                     }
 
                     const CommandClass = cmd.class;
-                    // Map remaining args? 
-                    // The args array contains positional args AFTER subcommand.
-                    // But we didn't define them in CAC, so they are just strings.
-                    // We need to map them manually to the Target Command's args definition.
-                    // argsDef.args usually starts after the command.
-                    // For 'module add <url>', <url> is the first arg after 'add'.
-                    // So 'args' here corresponds to <url>.
-
                     const argsDef = CommandClass.args || {};
-                    // If using [...args], the variadic args are collected into the first argument array
-                    // args here is what remains after popping options.
                     const positionalArgs = (args.length > 0 && Array.isArray(args[0])) ? args[0] : args;
 
                     const childOptions = { ...options }; // Copy options
@@ -242,24 +210,28 @@ export class CLI {
                         });
                     }
 
+                    if (argsDef.options) {
+                        argsDef.options.forEach((opt: any) => {
+                            const name = opt.name.replace(/^-+/, ''); // remove leading dashes
+                            const camelName = name.split(' ')[0].replace(/-([a-z])/g, (g: string) => g[1].toUpperCase());
+
+                            // Check both raw name and camelCase name
+                            // CAC usually provides camelCase options
+                            if (childOptions[camelName] === undefined && opt.default !== undefined) {
+                                childOptions[camelName] = opt.default;
+                            }
+                        });
+                    }
+
                     await this.runCommand(CommandClass, childOptions, cmdParts);
                 });
             }
         }
-        // Disable default help
-        // this.cli.help(); 
 
         // Manually register global help to ensure it's allowed
         this.cli.option('--help, -h', 'Display help');
 
         this.cli.version(this.version);
-
-        // Global help interception for root command
-        // If we run `app --help`, we need to catch it.
-        // CAC doesn't expose a clean global action without a command content.
-        // However, if we parse and no command matches, it usually errors or shows help.
-        // If we have default logic, we can put it here?
-        // Let's rely on standard parsing but maybe inspect raw args first?
 
         if (process.argv.includes('--help') || process.argv.includes('-h')) {
             // Inspect non-option args to see if there's a command?
@@ -280,14 +252,6 @@ export class CLI {
             // Simple heuristic: find first non-flag arg as command
             const args = process.argv.slice(2);
             const potentialCommand = args.find(a => !a.startsWith('-'));
-            // If it matches a loaded command root, show help for it
-            // Otherwise show global help
-
-            // We need to match 'module add' etc?
-            // Just pass the potential command parts to runHelp. 
-            // runHelp handles filtering itself? No, runHelp takes commandParts to pass to HelpCommand.
-            // HelpCommand expects `command` array.
-
             const helpArgs = potentialCommand ? [potentialCommand] : [];
             await this.runHelp(helpArgs);
 
