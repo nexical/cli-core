@@ -80,7 +80,7 @@ export class CLI {
             logger.debug("No commands directory found.");
         }
 
-        for (const dir of commandsDirs) {
+        for (const dir of new Set(commandsDirs)) {
             // Loader accumulates commands
             await this.loader.load(dir);
         }
