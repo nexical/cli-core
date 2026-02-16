@@ -107,7 +107,10 @@ export default class HelpCommand extends BaseCommand {
         console.log('');
 
         if (CommandClass.help) {
-            console.log(CommandClass.help);
+            const helpLines = CommandClass.help.split('\n');
+            for (const line of helpLines) {
+                console.log(`  ${line}`);
+            }
             console.log('');
         }
 

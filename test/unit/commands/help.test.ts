@@ -149,8 +149,8 @@ describe('HelpCommand', () => {
         // Should print description
         expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Detailed command'));
         // Should print help
-        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Multi-line detailed help text.'));
-        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Second line.'));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('  Multi-line detailed help text.'));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('  Second line.'));
     });
 
     it('should display subcommand help when CAC command is missing (fallback to LoadedCommand)', async () => {
