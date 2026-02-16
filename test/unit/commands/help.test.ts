@@ -128,6 +128,31 @@ describe('HelpCommand', () => {
         expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('--force'));
     });
 
+    it('should display detailed command help (help property) if present', async () => {
+        const cmd = new HelpCommand(mockCli);
+
+        // Mock loaded commands with help definition
+        mockCli.getCommands.mockReturnValue([
+            {
+                command: 'detailed',
+                class: {
+                    description: 'Detailed command',
+                    help: 'Multi-line detailed help text.\nSecond line.',
+                    args: {}
+                }
+            }
+        ]);
+        mockRawCli.commands = [];
+
+        await cmd.run({ command: ['detailed'] });
+
+        // Should print description
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Detailed command'));
+        // Should print help
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Multi-line detailed help text.'));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Second line.'));
+    });
+
     it('should display subcommand help when CAC command is missing (fallback to LoadedCommand)', async () => {
         const cmd = new HelpCommand(mockCli);
 

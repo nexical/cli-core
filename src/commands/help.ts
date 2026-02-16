@@ -106,6 +106,11 @@ export default class HelpCommand extends BaseCommand {
         console.log(`  ${description}`);
         console.log('');
 
+        if (CommandClass.help) {
+            console.log(CommandClass.help);
+            console.log('');
+        }
+
         // Arguments
         // Prefer class definition (or cacCmd definition if we wanted, but class is source of truth for our commands)
         const argsDef = CommandClass.args?.args;

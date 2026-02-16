@@ -8,6 +8,7 @@ import { consola } from 'consola';
 export abstract class BaseCommand implements CommandInterface {
     static usage = '';
     static description = '';
+    static help = '';
     static args: CommandDefinition = {};
 
     // Configurable flags
